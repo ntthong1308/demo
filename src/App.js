@@ -19,6 +19,11 @@ import RegisterPage from './pages/auth/Register';
 import ForgotPasswordPage from './pages/auth/ForgotPassword';
 import ResetPasswordPage from './pages/auth/ResetPassword';
 
+// New pages
+import Equipment from './pages/Equipment';
+import News from './pages/News';
+import Contact from './pages/Contact';
+
 // Sửa đường dẫn import để trỏ đến vị trí đúng của các file
 import DoctorSearch from './pages/patient/DoctorSearch';
 import DoctorDetails from './pages/patient/DoctorDetail';
@@ -61,6 +66,11 @@ function AppWithRouter() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+          
+          {/* New public pages */}
+          <Route path="/equipment" element={<Equipment />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/contact" element={<Contact />} />
           
           {/* Doctor Search routes */}
           <Route path="/doctors" element={<DoctorSearch />} />
