@@ -7,7 +7,10 @@ const Register = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    username:'',
     email: '',
+    address:'',
+    dob:'',
     password: '',
     confirmPassword: '',
     phoneNumber: ''
@@ -45,12 +48,16 @@ const Register = () => {
     
     // Gọi API đăng ký
     const result = await register({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      password: formData.password,
-      phoneNumber: formData.phoneNumber
+     firstName: formData.firstName,
+     lastName: formData.lastName,
+     username: formData.username,
+     email: formData.email,
+     address: formData.address,
+     dob: formData.dob,
+     password: formData.password,
+     phoneNumber: formData.phoneNumber
     });
+
     
     if (result.success) {
       setSuccess(true);
@@ -115,8 +122,24 @@ const Register = () => {
                   </Form.Group>
                 </Col>
               </Row>
+               <Form.Group className="mb-4">
+                <Form.Label>Tên đăng nhập</Form.Label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <i className="bi bi-person-badge"></i>
+                  </span>
+                  <Form.Control
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Nhập tên đăng nhập"
+                    required
+                  />
+                </div>
+                </Form.Group>
 
-              <Form.Group className="mb-4">
+               <Form.Group className="mb-4">
                 <Form.Label>Email</Form.Label>
                 <div className="input-group">
                   <span className="input-group-text bg-light">
@@ -132,7 +155,7 @@ const Register = () => {
                   />
                 </div>
               </Form.Group>
-
+   
               <Form.Group className="mb-4">
                 <Form.Label>Số điện thoại</Form.Label>
                 <div className="input-group">
@@ -149,7 +172,43 @@ const Register = () => {
                   />
                 </div>
               </Form.Group>
-
+              <Row>
+              <Col md={6}>
+               <Form.Group className="mb-4">
+                <Form.Label>Địa chỉ</Form.Label>
+                <div className="input-group">
+                 <span className="input-group-text bg-light">
+                 <i className="bi bi-geo-alt"></i>
+                 </span>
+               <Form.Control
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Nhập địa chỉ của bạn"
+                  required
+                />
+                </div>
+               </Form.Group>
+              </Col>
+  <Col md={6}>
+    <Form.Group className="mb-4">
+      <Form.Label>Ngày sinh</Form.Label>
+      <div className="input-group">
+        <span className="input-group-text bg-light">
+          <i className="bi bi-calendar"></i>
+        </span>
+        <Form.Control
+          type="date"
+          name="dob"
+          value={formData.dob}
+          onChange={handleChange}
+          required
+        />
+      </div>
+    </Form.Group>
+  </Col>
+</Row>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-4">
