@@ -11,7 +11,7 @@ const DoctorCard = ({ doctor, isSelected, onSelect }) => {
       <div className="doctor-img-container">
         <Card.Img 
           variant="top" 
-          src={doctor.image || 'https://via.placeholder.com/150?text=Doctor'} 
+          src={doctor.imageUrl || 'https://via.placeholder.com/150?text=Doctor'} 
           className="doctor-img"
         />
         {doctor.rating && (
@@ -23,30 +23,30 @@ const DoctorCard = ({ doctor, isSelected, onSelect }) => {
       
       <Card.Body>
         <Card.Title className="doctor-name">
-          {doctor.title} {doctor.firstName} {doctor.lastName}
+          {doctor.fullName}
         </Card.Title>
         
         <div className="specialties">
-          {doctor.specialtyNames.map((specialty, index) => (
-            <Badge key={index} bg="info" className="me-1 mb-1">{specialty}</Badge>
-          ))}
+          {doctor.specialty && (
+            <Badge bg="info" className="me-1 mb-1">{doctor.specialty}</Badge>
+          )}
         </div>
         
         <div className="doctor-info mt-2">
           <div className="info-item">
             <i className="bi bi-hospital"></i>
-            <span>{doctor.hospital}</span>
+            <span>{doctor.department?.name || 'Không rõ'}</span>
           </div>
           
           <div className="info-item">
             <i className="bi bi-calendar-check"></i>
-            <span>{doctor.experience} năm kinh nghiệm</span>
+            <span>{doctor.experience || 0} năm kinh nghiệm</span>
           </div>
           
-          {doctor.price && (
+          {doctor.fee && (
             <div className="info-item price">
               <i className="bi bi-cash"></i>
-              <span>{doctor.price.toLocaleString('vi-VN')}đ / lần khám</span>
+              <span>{doctor.fee.toLocaleString('vi-VN')}đ / lần khám</span>
             </div>
           )}
         </div>

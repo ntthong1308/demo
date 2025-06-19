@@ -132,11 +132,6 @@ const Header = () => {
               <Nav.Link as={Link} to="/news" className="menu-item">Tin tức</Nav.Link>
               <Nav.Link as={Link} to="/contact" className="menu-item">Liên hệ</Nav.Link>
             </Nav>
-            <div className="d-flex">
-              <Nav.Link as={Link} to="/search" className="menu-item">
-                <i className="bi bi-search"></i>
-              </Nav.Link>
-            </div>
           </Navbar.Collapse>
         </Container>
       </Navbar>
