@@ -1,195 +1,106 @@
-import React from 'react';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { FaUserMd, FaHospital, FaHeartbeat, FaStethoscope, FaComments } from 'react-icons/fa';
+import { Container, Row, Col, Button } from "react-bootstrap"
+import { Link } from "react-router-dom"
 
 const Home = () => {
   return (
-    <>
+    <div className="home">
       {/* Hero Section */}
-      <div className="hero-section">
+      <section className="hero-section bg-white text-dark py-5">
         <Container>
-          <Row className="align-items-center">
-            <Col lg={6} className="mb-5 mb-lg-0">
-              <h1 className="hero-title">HỆ THỐNG BỆNH VIỆN CAO CẤP CHUẨN 5 SAO</h1>
-              <p className="hero-subtitle">
-                MediSched là địa chỉ uy tín về khám chữa bệnh, với đội ngũ chuyên gia - bác sĩ hàng đầu, trang thiết bị hiện đại, cùng các phác đồ điều trị hiệu quả, khoa học mang đến dịch vụ khám, điều trị, chăm sóc sức khỏe cao cấp, toàn diện với chi phí hợp lý.
+          <Row className="align-items-center min-vh-50">
+            <Col lg={6}>
+              <h1 className="display-4 fw-bold mb-4">Đặt lịch khám bệnh dễ dàng với MediSched</h1>
+              <p className="lead mb-4">
+                Hệ thống đặt lịch khám bệnh trực tuyến hiện đại, kết nối bạn với các bác sĩ chuyên khoa hàng đầu.
               </p>
               <div className="d-flex gap-3">
-                <Link to="/book-appointment">
-                  <Button variant="light" size="lg">Đặt lịch khám ngay</Button>
-                </Link>
-                <Link to="/doctors">
-                  <Button variant="outline-light" size="lg">Đội ngũ bác sĩ</Button>
-                </Link>
+                <Button as={Link} to="/doctors" size="lg" variant="primary">
+                  Tìm bác sĩ
+                </Button>
+                <Button as={Link} to="/register" size="lg" variant="outline-light">
+                  Đăng ký ngay
+                </Button>
               </div>
             </Col>
             <Col lg={6}>
-              <div className="text-center">
-                <img 
-                  src="/placeholder-hospital.jpg" 
-                  alt="Bệnh viện MediSched" 
-                  className="img-fluid rounded shadow" 
-                  style={{ maxHeight: '400px', width: '100%', objectFit: 'cover' }}
-                />
-              </div>
+              <img
+                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop"
+                alt="Medical consultation"
+                className="img-fluid rounded shadow"
+                onError={(e) => {
+                  e.target.src = "/placeholder.svg?height=400&width=600"
+                }}
+              />
             </Col>
           </Row>
         </Container>
-      </div>
+      </section>
 
-      {/* Giá trị khác biệt */}
-      <section className="feature-section">
+      {/* Features Section */}
+      <section className="py-5">
         <Container>
-          <h2 className="section-title">GIÁ TRỊ KHÁC BIỆT CỦA MEDISCHED</h2>
-          <div className="section-subtitle mb-5"></div>
-          
+          <Row className="text-center mb-5">
+            <Col>
+              <h2 className="display-5 fw-bold">Tại sao chọn MediSched?</h2>
+              <p className="lead text-muted">Chúng tôi mang đến trải nghiệm đặt lịch khám bệnh tốt nhất</p>
+            </Col>
+          </Row>
           <Row>
-            <Col lg={4} md={6} className="mb-4">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaUserMd />
+            <Col md={4} className="mb-4">
+              <div className="text-center">
+                <div
+                  className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                  style={{ width: "80px", height: "80px" }}
+                >
+                  <i className="bi bi-calendar-check fs-2"></i>
                 </div>
-                <h3 className="feature-title">CHUYÊN GIA ĐẦU NGÀNH - BÁC SĨ GIỎI</h3>
-                <p className="feature-text">
-                  Đội ngũ chuyên gia đầu ngành, bác sĩ chuyên môn cao, giàu kinh nghiệm đến từ các bệnh viện lớn.
-                </p>
+                <h4>Đặt lịch dễ dàng</h4>
+                <p className="text-muted">Đặt lịch khám bệnh chỉ với vài cú click, tiết kiệm thời gian và công sức.</p>
               </div>
             </Col>
-            
-            <Col lg={4} md={6} className="mb-4">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaHospital />
+            <Col md={4} className="mb-4">
+              <div className="text-center">
+                <div
+                  className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                  style={{ width: "80px", height: "80px" }}
+                >
+                  <i className="bi bi-people fs-2"></i>
                 </div>
-                <h3 className="feature-title">TRANG THIẾT BỊ HIỆN ĐẠI</h3>
-                <p className="feature-text">
-                  Hệ thống trang thiết bị y tế hiện đại, nhập khẩu từ các nước tiên tiến trên thế giới.
-                </p>
+                <h4>Bác sĩ chuyên khoa</h4>
+                <p className="text-muted">Đội ngũ bác sĩ giàu kinh nghiệm, chuyên khoa đa dạng phục vụ mọi nhu cầu.</p>
               </div>
             </Col>
-            
-            <Col lg={4} md={6} className="mb-4">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaHeartbeat />
+            <Col md={4} className="mb-4">
+              <div className="text-center">
+                <div
+                  className="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                  style={{ width: "80px", height: "80px" }}
+                >
+                  <i className="bi bi-shield-check fs-2"></i>
                 </div>
-                <h3 className="feature-title">HIỆU QUẢ ĐIỀU TRỊ CAO</h3>
-                <p className="feature-text">
-                  Áp dụng các phác đồ điều trị tiên tiến, hiện đại mang lại hiệu quả tối ưu cho người bệnh.
-                </p>
-              </div>
-            </Col>
-            
-            <Col lg={4} md={6} className="mb-4">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaStethoscope />
-                </div>
-                <h3 className="feature-title">QUY TRÌNH TOÀN DIỆN</h3>
-                <p className="feature-text">
-                  Quy trình khám chữa bệnh chuyên nghiệp, nhanh chóng, tiết kiệm thời gian cho bệnh nhân.
-                </p>
-              </div>
-            </Col>
-            
-            <Col lg={4} md={6} className="mb-4">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaComments />
-                </div>
-                <h3 className="feature-title">TƯ VẤN CHUYÊN SÂU</h3>
-                <p className="feature-text">
-                  Dịch vụ tư vấn y khoa chuyên sâu, giúp bệnh nhân hiểu rõ về tình trạng sức khỏe của mình.
-                </p>
-              </div>
-            </Col>
-            
-            <Col lg={4} md={6} className="mb-4">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaHospital />
-                </div>
-                <h3 className="feature-title">DỊCH VỤ CAO CẤP</h3>
-                <p className="feature-text">
-                  Cung cấp dịch vụ y tế cao cấp với chi phí hợp lý, phù hợp với nhu cầu đa dạng.
-                </p>
+                <h4>An toàn & Bảo mật</h4>
+                <p className="text-muted">Thông tin cá nhân được bảo mật tuyệt đối theo tiêu chuẩn quốc tế.</p>
               </div>
             </Col>
           </Row>
         </Container>
       </section>
 
-      {/* Thống kê */}
-      <section className="stats-section">
+      {/* CTA Section */}
+      <section className="bg-light py-5">
         <Container>
-          <h2 className="section-title">ĐỘI NGŨ Y BÁC SĨ CHUYÊN MÔN CAO</h2>
-          <div className="section-subtitle">Quy tụ đội ngũ chuyên gia đầu ngành, bác sĩ chuyên môn cao, giàu kinh nghiệm</div>
-          
-          <Row className="mt-5">
-            <Col lg={2} sm={4} xs={6} className="mb-4">
-              <div className="stat-item">
-                <div className="stat-number">24</div>
-                <div className="stat-label">GIÁO SƯ</div>
-              </div>
-            </Col>
-            
-            <Col lg={2} sm={4} xs={6} className="mb-4">
-              <div className="stat-item">
-                <div className="stat-number">171</div>
-                <div className="stat-label">TIẾN SĨ</div>
-              </div>
-            </Col>
-            
-            <Col lg={2} sm={4} xs={6} className="mb-4">
-              <div className="stat-item">
-                <div className="stat-number">490</div>
-                <div className="stat-label">THẠC SĨ</div>
-              </div>
-            </Col>
-            
-            <Col lg={2} sm={4} xs={6} className="mb-4">
-              <div className="stat-item">
-                <div className="stat-number">786</div>
-                <div className="stat-label">BÁC SĨ</div>
-              </div>
-            </Col>
-            
-            <Col lg={2} sm={4} xs={6} className="mb-4">
-              <div className="stat-item">
-                <div className="stat-number">155</div>
-                <div className="stat-label">KỸ THUẬT VIÊN</div>
-              </div>
-            </Col>
-            
-            <Col lg={2} sm={4} xs={6} className="mb-4">
-              <div className="stat-item">
-                <div className="stat-number">803</div>
-                <div className="stat-label">ĐIỀU DƯỠNG</div>
-              </div>
+          <Row className="text-center">
+            <Col>
+              <h2 className="mb-4">Bắt đầu chăm sóc sức khỏe của bạn ngay hôm nay</h2>
+              <Button as={Link} to="/register" size="lg" variant="primary">
+                Đăng ký miễn phí
+              </Button>
             </Col>
           </Row>
         </Container>
       </section>
+    </div>
+  )
+}
 
-      {/* Call to Action */}
-      <section className="feature-section">
-        <Container>
-          <Row className="justify-content-center">
-            <Col md={8} className="text-center">
-              <h3>ĐẶT LỊCH KHÁM NGAY HÔM NAY</h3>
-              <p className="lead mt-3 mb-4">
-                Đặt lịch khám trực tuyến để được ưu tiên khám sớm và không phải chờ đợi
-              </p>
-              <Link to="/book-appointment">
-                <Button variant="primary" size="lg">Đặt lịch khám ngay</Button>
-              </Link>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-    </>
-  );
-};
-
-export default Home;
+export default Home

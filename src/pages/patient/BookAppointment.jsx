@@ -1,272 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner, ProgressBar } from 'react-bootstrap';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+"use client"
 
-// Mock doctors data
-const mockDoctors = [
-  {
-    id: 1,
-    firstName: 'Văn',
-    lastName: 'Hoàng',
-    title: 'Bác sĩ',
-    specialties: ['cardiology', 'internal'],
-    specialtyNames: ['Tim mạch', 'Nội khoa'],
-    hospital: 'Bệnh viện Đại học Y Dược',
-    experience: 15,
-    rating: 4.9,
-    price: 500000,
-    image: 'https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg',
-    availableSlots: [
-      { date: '2025-06-14', slots: ['8:00', '9:00', '10:00', '14:00'] },
-      { date: '2025-06-15', slots: ['8:00', '9:00', '15:00', '16:00'] },
-      { date: '2025-06-16', slots: ['10:00', '11:00', '14:00', '15:00'] }
-    ]
-  },
-  {
-    id: 2,
-    firstName: 'Thị Hương',
-    lastName: 'Nguyễn',
-    title: 'Bác sĩ',
-    specialties: ['dermatology'],
-    specialtyNames: ['Da liễu'],
-    hospital: 'Bệnh viện Da liễu Trung ương',
-    experience: 10,
-    rating: 4.7,
-    price: 450000,
-    image: 'https://img.freepik.com/free-photo/front-view-covid-recovery-center-female-doctor-with-stethoscope_23-2148847899.jpg',
-    availableSlots: [
-      { date: '2025-06-14', slots: ['9:00', '10:00', '14:00', '15:00'] },
-      { date: '2025-06-15', slots: ['8:00', '11:00', '13:00', '16:00'] },
-      { date: '2025-06-16', slots: ['9:00', '10:00', '14:00', '15:00'] }
-    ]
-  },
-  {
-    id: 3,
-    firstName: 'Minh',
-    lastName: 'Lê',
-    title: 'PGS.TS.BS',
-    specialties: ['neurology'],
-    specialtyNames: ['Thần kinh'],
-    hospital: 'Bệnh viện Bạch Mai',
-    experience: 20,
-    rating: 5.0,
-    price: 700000,
-    image: 'https://img.freepik.com/free-photo/pleased-young-male-doctor-wearing-medical-robe-stethoscope-showing-thumb-up_409827-2765.jpg',
-    availableSlots: [
-      { date: '2025-06-14', slots: ['9:00', '10:00', '15:00'] },
-      { date: '2025-06-15', slots: ['10:00', '11:00', '14:00'] },
-      { date: '2025-06-16', slots: ['8:00', '9:00', '16:00'] }
-    ]
-  }
-];
+import { useState, useEffect } from "react"
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner, ProgressBar } from "react-bootstrap"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { doctorAPI, appointmentAPI } from "../../services/api"
+import { useAuth } from "../../context/AuthContext"
 
 function BookAppointment() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { currentUser } = useAuth()
+  const queryParams = new URLSearchParams(location.search)
+
   // Get date and time from query params if available
-  const preSelectedDate = queryParams.get('date') || '';
-  const preSelectedTime = queryParams.get('time') || '';
-  
+  const preSelectedDate = queryParams.get("date") || ""
+  const preSelectedTime = queryParams.get("time") || ""
+
   // State variables
-  const [currentStep, setCurrentStep] = useState(1);  // Theo dõi bước hiện tại
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [doctor, setDoctor] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [doctor, setDoctor] = useState(null)
   const [formData, setFormData] = useState({
     date: preSelectedDate,
     time: preSelectedTime,
-    symptoms: '',
-    name: '',
-    phone: '',
-    email: '',
-    notes: '',
+    symptoms: "",
+    name: "",
+    phone: "",
+    email: "",
+    notes: "",
     useInsurance: false,
-    insuranceProvider: '',
-    insuranceNumber: ''
-  });
-  const [availableDates, setAvailableDates] = useState([]);
-  const [timeSlots, setTimeSlots] = useState([]);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
-  
+    insuranceProvider: "",
+    insuranceNumber: "",
+  })
+  const [availableDates, setAvailableDates] = useState([])
+  const [timeSlots, setTimeSlots] = useState([])
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(null)
+
+  // Update form data when user info is available
+  useEffect(() => {
+    if (currentUser) {
+      setFormData((prev) => ({
+        ...prev,
+        name: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
+        phone: currentUser.phoneNumber || currentUser.phone || "",
+        email: currentUser.email || "",
+      }))
+    }
+  }, [currentUser])
+
   // Fetch doctor data
   useEffect(() => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      const foundDoctor = mockDoctors.find(doc => doc.id.toString() === id);
-      if (foundDoctor) {
-        setDoctor(foundDoctor);
-        // Extract only the dates from available slots for easier rendering
-        setAvailableDates(foundDoctor.availableSlots.map(slot => slot.date));
-        
+    const loadDoctor = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const response = await doctorAPI.getById(id)
+        const doctorData = response.data
+
+        setDoctor(doctorData)
+
+        // For now, create mock availability since backend might not have this
+        // You can remove this when backend provides availability
+        const mockAvailability = [
+          { date: "2025-06-18", slots: ["8:00", "9:00", "10:00", "14:00"] },
+          { date: "2025-06-19", slots: ["8:00", "9:00", "15:00", "16:00"] },
+          { date: "2025-06-20", slots: ["10:00", "11:00", "14:00", "15:00"] },
+        ]
+
+        // Use backend availability if available, otherwise use mock
+        const availability = doctorData.availability || doctorData.schedules || mockAvailability
+
+        setAvailableDates(availability.map((slot) => slot.date))
+
         // If date is preselected, load time slots for that date
         if (preSelectedDate) {
-          const slots = foundDoctor.availableSlots.find(s => s.date === preSelectedDate);
+          const slots = availability.find((s) => s.date === preSelectedDate)
           if (slots) {
-            setTimeSlots(slots.slots);
+            setTimeSlots(slots.slots || slots.timeSlots || [])
           }
         }
+      } catch (err) {
+        setError("Không thể tải thông tin bác sĩ. Vui lòng thử lại.")
+        console.error("Error loading doctor:", err)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false);
-    }, 800);
-  }, [id, preSelectedDate]);
-  
-  // Format date to display in a more user-friendly way
+    }
+
+    if (id) {
+      loadDoctor()
+    }
+  }, [id, preSelectedDate])
+
+  // Format date functions
   const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('vi-VN', options);
-  };
+    if (!dateString) return ""
+    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+    return new Date(dateString).toLocaleDateString("vi-VN", options)
+  }
 
-  // Format short date (for cards)
   const formatShortDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const dayOfWeek = date.toLocaleDateString('vi-VN', { weekday: 'short' });
-    return { day, month, dayOfWeek };
-  };
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const dayOfWeek = date.toLocaleDateString("vi-VN", { weekday: "short" })
+    return { day, month, dayOfWeek }
+  }
 
-  // Check if a date is today, tomorrow, etc.
   const getRelativeDay = (dateString) => {
-    if (!dateString) return '';
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
-    
-    if (date.getTime() === today.getTime()) return 'Hôm nay';
-    if (date.getTime() === tomorrow.getTime()) return 'Ngày mai';
-    
-    return '';
-  };
-  
+    if (!dateString) return ""
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    const date = new Date(dateString)
+    date.setHours(0, 0, 0, 0)
+
+    if (date.getTime() === today.getTime()) return "Hôm nay"
+    if (date.getTime() === tomorrow.getTime()) return "Ngày mai"
+
+    return ""
+  }
+
   // Handle date selection
   const handleDateSelect = (selectedDate) => {
-    const slots = doctor.availableSlots.find(s => s.date === selectedDate);
-    
+    // Mock availability for now
+    const mockAvailability = [
+      { date: "2025-06-18", slots: ["8:00", "9:00", "10:00", "14:00"] },
+      { date: "2025-06-19", slots: ["8:00", "9:00", "15:00", "16:00"] },
+      { date: "2025-06-20", slots: ["10:00", "11:00", "14:00", "15:00"] },
+    ]
+
+    const availability = doctor?.availability || doctor?.schedules || mockAvailability
+    const slots = availability.find((s) => s.date === selectedDate)
+
     setFormData({
       ...formData,
       date: selectedDate,
-      time: '' // Reset time when date changes
-    });
-    
-    setTimeSlots(slots ? slots.slots : []);
-  };
-  
+      time: "", // Reset time when date changes
+    })
+
+    setTimeSlots(slots ? slots.slots || slots.timeSlots || [] : [])
+  }
+
   // Handle time selection
   const handleTimeSelect = (selectedTime) => {
     setFormData({
       ...formData,
-      time: selectedTime
-    });
-  };
-  
+      time: selectedTime,
+    })
+  }
+
   // Handle form field changes
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-  
-  // Go to next step
+      [name]: type === "checkbox" ? checked : value,
+    })
+  }
+
+  // Navigation functions
   const goToNextStep = () => {
-    const isValid = validateCurrentStep();
+    const isValid = validateCurrentStep()
     if (isValid) {
-      window.scrollTo(0, 0);
-      setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0)
+      setCurrentStep(currentStep + 1)
     }
-  };
-  
-  // Go to previous step
+  }
+
   const goToPreviousStep = () => {
-    setCurrentStep(currentStep - 1);
-    window.scrollTo(0, 0);
-  };
-  
+    setCurrentStep(currentStep - 1)
+    window.scrollTo(0, 0)
+  }
+
   // Validate current step
   const validateCurrentStep = () => {
-    setError(null);
-    
+    setError(null)
+
     if (currentStep === 1) {
       if (!formData.date) {
-        setError('Vui lòng chọn ngày khám');
-        return false;
+        setError("Vui lòng chọn ngày khám")
+        return false
       }
       if (!formData.time) {
-        setError('Vui lòng chọn giờ khám');
-        return false;
+        setError("Vui lòng chọn giờ khám")
+        return false
       }
-    } 
-    else if (currentStep === 2) {
+    } else if (currentStep === 2) {
       if (!formData.symptoms || formData.symptoms.trim().length < 5) {
-        setError('Vui lòng mô tả triệu chứng hoặc lý do khám (tối thiểu 5 ký tự)');
-        return false;
+        setError("Vui lòng mô tả triệu chứng hoặc lý do khám (tối thiểu 5 ký tự)")
+        return false
       }
-      
-      // Kiểm tra email (nếu có)
-      if (formData.email && !formData.email.includes('@')) {
-        setError('Địa chỉ email không hợp lệ');
-        return false;
+
+      if (formData.email && !formData.email.includes("@")) {
+        setError("Địa chỉ email không hợp lệ")
+        return false
       }
-      
-      // Kiểm tra số điện thoại (nếu có)
-      if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\s/g, ''))) {
-        setError('Số điện thoại không hợp lệ');
-        return false;
+
+      if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\s/g, ""))) {
+        setError("Số điện thoại không hợp lệ")
+        return false
       }
     }
-    
-    return true;
-  };
-  
+
+    return true
+  }
+
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
     if (!validateCurrentStep()) {
-      return;
+      return
     }
-    
-    setSubmitting(true);
-    setError(null);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Booking data:', {
-        doctorId: id,
-        doctorName: doctor ? `${doctor.title} ${doctor.firstName} ${doctor.lastName}` : '',
-        ...formData,
-        bookingDate: new Date().toISOString()
-      });
-      
-      setSuccess(true);
-      setSubmitting(false);
-      
+
+    try {
+      setSubmitting(true)
+      setError(null)
+
+      // Prepare appointment data to match backend DTO
+      const appointmentData = {
+        doctorId: Number.parseInt(id),
+        patientId: currentUser?.id,
+        appointmentDate: formData.date,
+        appointmentTime: formData.time,
+        symptoms: formData.symptoms,
+        notes: formData.notes,
+        // Additional fields that might be expected by backend
+        patientName: formData.name,
+        patientPhone: formData.phone,
+        patientEmail: formData.email,
+        status: "PENDING", // Default status
+      }
+
+      const response = await appointmentAPI.book(appointmentData)
+
+      console.log("Appointment booked successfully:", response.data)
+      setSuccess(true)
+
       // Redirect after showing success message
       setTimeout(() => {
-        navigate('/patient/appointments');
-      }, 3000);
-    }, 1500);
-  };
-  
-  // Calculate progress percentage for the progress bar
+        navigate("/patient/appointments")
+      }, 3000)
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || err.response?.data?.error || "Không thể đặt lịch khám. Vui lòng thử lại."
+      setError(errorMessage)
+      console.error("Error booking appointment:", err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // Calculate progress percentage
   const calculateProgress = () => {
-    return (currentStep / 3) * 100;
-  };
-  
+    return (currentStep / 3) * 100
+  }
+
   // Render success message
   if (success) {
     return (
@@ -276,13 +275,13 @@ function BookAppointment() {
             <Card className="border-0 shadow success-card">
               <Card.Body className="text-center p-5">
                 <div className="mb-4">
-                  <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '5rem' }}></i>
+                  <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "5rem" }}></i>
                 </div>
                 <h2 className="mb-3">Đặt lịch thành công!</h2>
                 <p className="lead mb-4">
                   Bạn đã đặt lịch khám thành công với {doctor?.title} {doctor?.firstName} {doctor?.lastName}.
                 </p>
-                
+
                 <Card className="bg-light border-0 mb-4">
                   <Card.Body>
                     <Row>
@@ -297,11 +296,11 @@ function BookAppointment() {
                     </Row>
                   </Card.Body>
                 </Card>
-                
+
                 <p className="mb-4">
                   Thông tin chi tiết đã được gửi đến email của bạn. Bạn sẽ được chuyển đến trang quản lý lịch hẹn...
                 </p>
-                
+
                 <Spinner animation="border" variant="primary" />
                 <p className="mt-2 text-muted">Đang chuyển hướng...</p>
               </Card.Body>
@@ -309,23 +308,23 @@ function BookAppointment() {
           </Col>
         </Row>
       </Container>
-    );
+    )
   }
-  
+
   // Render loading state
   if (loading) {
     return (
       <Container className="py-5 text-center">
         <div className="loading-container">
-          <Spinner animation="border" role="status" variant="primary" style={{ width: '3rem', height: '3rem' }}>
+          <Spinner animation="border" role="status" variant="primary" style={{ width: "3rem", height: "3rem" }}>
             <span className="visually-hidden">Đang tải...</span>
           </Spinner>
           <p className="mt-3 lead">Đang tải thông tin bác sĩ...</p>
         </div>
       </Container>
-    );
+    )
   }
-  
+
   // Render error state if doctor not found
   if (!doctor) {
     return (
@@ -333,36 +332,34 @@ function BookAppointment() {
         <Alert variant="danger">
           <Alert.Heading>Không tìm thấy thông tin bác sĩ</Alert.Heading>
           <p>Không thể tìm thấy thông tin của bác sĩ với ID: {id}</p>
-          <Button variant="primary" onClick={() => navigate('/doctors')}>
+          <Button variant="primary" onClick={() => navigate("/doctors")}>
             Quay lại danh sách bác sĩ
           </Button>
         </Alert>
       </Container>
-    );
+    )
   }
 
   return (
     <Container className="py-5">
       <h2 className="text-center mb-2">Đặt lịch khám bệnh</h2>
-      <p className="text-center text-muted mb-4">
-        Vui lòng hoàn thành các bước sau để đặt lịch khám bệnh với bác sĩ
-      </p>
-      
+      <p className="text-center text-muted mb-4">Vui lòng hoàn thành các bước sau để đặt lịch khám bệnh với bác sĩ</p>
+
       {/* Progress bar */}
       <Row className="justify-content-center mb-5">
         <Col md={8}>
           <div className="booking-progress">
             <ProgressBar now={calculateProgress()} className="mb-3" />
             <div className="d-flex justify-content-between progress-steps">
-              <div className={`progress-step ${currentStep >= 1 ? 'active' : ''}`}>
+              <div className={`progress-step ${currentStep >= 1 ? "active" : ""}`}>
                 <span className="step-number">1</span>
                 <span className="step-label d-none d-md-inline">Chọn thời gian</span>
               </div>
-              <div className={`progress-step ${currentStep >= 2 ? 'active' : ''}`}>
+              <div className={`progress-step ${currentStep >= 2 ? "active" : ""}`}>
                 <span className="step-number">2</span>
                 <span className="step-label d-none d-md-inline">Thông tin khám bệnh</span>
               </div>
-              <div className={`progress-step ${currentStep >= 3 ? 'active' : ''}`}>
+              <div className={`progress-step ${currentStep >= 3 ? "active" : ""}`}>
                 <span className="step-number">3</span>
                 <span className="step-label d-none d-md-inline">Xác nhận</span>
               </div>
@@ -370,7 +367,7 @@ function BookAppointment() {
           </div>
         </Col>
       </Row>
-      
+
       <Row className="justify-content-center">
         <Col md={8}>
           {/* Doctor info card */}
@@ -379,37 +376,43 @@ function BookAppointment() {
               <Row>
                 <Col md={3} className="text-center">
                   <div className="doctor-avatar">
-                    <img 
-                      src={doctor.image} 
+                    <img
+                      src={doctor.profilePicture || "/placeholder.svg?height=100&width=100"}
                       alt={`${doctor.firstName} ${doctor.lastName}`}
                       className="rounded-circle"
-                      style={{ width: '100px', height: '100px', objectFit: 'cover', border: '2px solid #eee' }}
+                      style={{ width: "100px", height: "100px", objectFit: "cover", border: "2px solid #eee" }}
                     />
                   </div>
                 </Col>
                 <Col md={9}>
-                  <h4>{doctor.title} {doctor.firstName} {doctor.lastName}</h4>
+                  <h4>
+                    {doctor.title} {doctor.firstName} {doctor.lastName}
+                  </h4>
                   <div className="doctor-info">
-                    <span className="badge bg-primary me-2">{doctor.specialtyNames.join(', ')}</span>
-                    <span className="badge bg-secondary me-2">{doctor.experience} năm kinh nghiệm</span>
+                    {doctor.specialties?.map((specialty, index) => (
+                      <span key={index} className="badge bg-primary me-2">
+                        {specialty.name || specialty}
+                      </span>
+                    )) || <span className="badge bg-primary me-2">Chuyên khoa</span>}
+                    <span className="badge bg-secondary me-2">{doctor.experience || 0} năm kinh nghiệm</span>
                     <span className="badge bg-warning text-dark">
                       <i className="bi bi-star-fill me-1"></i>
-                      {doctor.rating}/5
+                      {doctor.rating || "N/A"}/5
                     </span>
                   </div>
                   <p className="mt-2 mb-1">
                     <i className="bi bi-hospital me-2"></i>
-                    {doctor.hospital}
+                    {doctor.hospital || "Bệnh viện"}
                   </p>
                   <p className="doctor-price">
                     <i className="bi bi-cash me-2"></i>
-                    <strong>{doctor.price.toLocaleString('vi-VN')}đ / lần khám</strong>
+                    <strong>{(doctor.consultationFee || 0).toLocaleString("vi-VN")}đ / lần khám</strong>
                   </p>
                 </Col>
               </Row>
             </Card.Body>
           </Card>
-          
+
           {/* Error alert */}
           {error && (
             <Alert variant="danger" className="mb-4">
@@ -417,12 +420,11 @@ function BookAppointment() {
               {error}
             </Alert>
           )}
-          
+
           {/* Main booking form card */}
           <Card className="shadow border-0">
             <Card.Body className="p-4">
               <Form onSubmit={handleSubmit}>
-                
                 {/* STEP 1: Choose date and time */}
                 {currentStep === 1 && (
                   <div className="step-content">
@@ -430,20 +432,23 @@ function BookAppointment() {
                       <i className="bi bi-calendar-check me-2"></i>
                       Chọn ngày và giờ khám
                     </h4>
-                    
+
                     {/* Date selection */}
                     <div className="mb-4">
-                      <label className="form-label">Chọn ngày khám <span className="text-danger">*</span></label>
+                      <label className="form-label">
+                        Chọn ngày khám <span className="text-danger">*</span>
+                      </label>
                       <div className="date-cards">
                         <Row>
                           {availableDates.map((date, index) => {
-                            const { day, month, dayOfWeek } = formatShortDate(date);
-                            const relativeDay = getRelativeDay(date);
+                            const { day, month, dayOfWeek } = formatShortDate(date)
+                            const relativeDay = getRelativeDay(date)
                             return (
                               <Col key={index} xs={6} md={4} className="mb-3">
-                                <Card 
-                                  className={`date-card ${formData.date === date ? 'selected' : ''}`}
+                                <Card
+                                  className={`date-card ${formData.date === date ? "selected" : ""}`}
                                   onClick={() => handleDateSelect(date)}
+                                  style={{ cursor: "pointer" }}
                                 >
                                   <Card.Body className="p-2 text-center">
                                     <p className="small mb-0">{dayOfWeek}</p>
@@ -453,28 +458,37 @@ function BookAppointment() {
                                   </Card.Body>
                                 </Card>
                               </Col>
-                            );
+                            )
                           })}
                         </Row>
                       </div>
                     </div>
-                    
+
                     {/* Time selection */}
                     <div className="mb-4">
                       <label className="form-label">
-                        {formData.date ? 'Chọn giờ khám' : 'Vui lòng chọn ngày khám trước'} 
+                        {formData.date ? "Chọn giờ khám" : "Vui lòng chọn ngày khám trước"}
                         {formData.date && <span className="text-danger">*</span>}
                       </label>
-                      
+
                       {formData.date && (
                         <div className="time-slots">
                           {timeSlots.length > 0 ? (
                             <Row>
                               {timeSlots.map((time, index) => (
                                 <Col key={index} xs={4} sm={3} md={2} className="mb-2">
-                                  <div 
-                                    className={`time-slot-card ${formData.time === time ? 'selected' : ''}`}
+                                  <div
+                                    className={`time-slot-card ${formData.time === time ? "selected" : ""}`}
                                     onClick={() => handleTimeSelect(time)}
+                                    style={{
+                                      cursor: "pointer",
+                                      padding: "10px",
+                                      border: "1px solid #ddd",
+                                      borderRadius: "5px",
+                                      textAlign: "center",
+                                      backgroundColor: formData.time === time ? "#007bff" : "#fff",
+                                      color: formData.time === time ? "#fff" : "#000",
+                                    }}
                                   >
                                     <span>{time}</span>
                                   </div>
@@ -490,7 +504,7 @@ function BookAppointment() {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Selected date and time summary */}
                     {formData.date && formData.time && (
                       <Card className="bg-light border-0 mb-4">
@@ -503,28 +517,21 @@ function BookAppointment() {
                         </Card.Body>
                       </Card>
                     )}
-                    
+
                     {/* Navigation buttons */}
                     <div className="d-flex justify-content-between mt-4">
-                      <Button 
-                        variant="outline-secondary" 
-                        onClick={() => navigate('/doctors/' + id)}
-                      >
+                      <Button variant="outline-secondary" onClick={() => navigate("/doctors/" + id)}>
                         <i className="bi bi-arrow-left me-2"></i>
                         Quay lại
                       </Button>
-                      <Button 
-                        variant="primary" 
-                        onClick={goToNextStep}
-                        disabled={!formData.date || !formData.time}
-                      >
+                      <Button variant="primary" onClick={goToNextStep} disabled={!formData.date || !formData.time}>
                         Tiếp tục
                         <i className="bi bi-arrow-right ms-2"></i>
                       </Button>
                     </div>
                   </div>
                 )}
-                
+
                 {/* STEP 2: Enter appointment and personal info */}
                 {currentStep === 2 && (
                   <div className="step-content">
@@ -532,9 +539,11 @@ function BookAppointment() {
                       <i className="bi bi-file-medical me-2"></i>
                       Thông tin khám bệnh
                     </h4>
-                    
+
                     <Form.Group className="mb-4">
-                      <Form.Label>Triệu chứng / Lý do khám <span className="text-danger">*</span></Form.Label>
+                      <Form.Label>
+                        Triệu chứng / Lý do khám <span className="text-danger">*</span>
+                      </Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={3}
@@ -548,44 +557,9 @@ function BookAppointment() {
                         Vui lòng mô tả chi tiết các triệu chứng để bác sĩ có thể chuẩn bị tốt nhất cho buổi khám
                       </Form.Text>
                     </Form.Group>
-                    
-                    <Form.Group className="mb-4">
-                      <Form.Check 
-                        type="checkbox"
-                        id="useInsurance"
-                        name="useInsurance"
-                        label="Sử dụng bảo hiểm y tế"
-                        checked={formData.useInsurance}
-                        onChange={handleChange}
-                        className="mb-2"
-                      />
-                      
-                      {formData.useInsurance && (
-                        <Row>
-                          <Col md={6} className="mb-3">
-                            <Form.Control
-                              type="text"
-                              name="insuranceProvider"
-                              placeholder="Đơn vị bảo hiểm"
-                              value={formData.insuranceProvider}
-                              onChange={handleChange}
-                            />
-                          </Col>
-                          <Col md={6} className="mb-3">
-                            <Form.Control
-                              type="text"
-                              name="insuranceNumber"
-                              placeholder="Số thẻ bảo hiểm"
-                              value={formData.insuranceNumber}
-                              onChange={handleChange}
-                            />
-                          </Col>
-                        </Row>
-                      )}
-                    </Form.Group>
-                    
+
                     <h5 className="mb-3">Thông tin liên hệ</h5>
-                    
+
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3">
@@ -617,7 +591,7 @@ function BookAppointment() {
                         </Form.Group>
                       </Col>
                     </Row>
-                    
+
                     <Form.Group className="mb-4">
                       <Form.Label>Email</Form.Label>
                       <div className="input-group">
@@ -632,11 +606,9 @@ function BookAppointment() {
                           onChange={handleChange}
                         />
                       </div>
-                      <Form.Text className="text-muted">
-                        Thông tin đặt lịch sẽ được gửi đến email này
-                      </Form.Text>
+                      <Form.Text className="text-muted">Thông tin đặt lịch sẽ được gửi đến email này</Form.Text>
                     </Form.Group>
-                    
+
                     <Form.Group className="mb-4">
                       <Form.Label>Ghi chú bổ sung</Form.Label>
                       <Form.Control
@@ -648,7 +620,7 @@ function BookAppointment() {
                         onChange={handleChange}
                       />
                     </Form.Group>
-                    
+
                     {/* Navigation buttons */}
                     <div className="d-flex justify-content-between mt-4">
                       <Button variant="outline-secondary" onClick={goToPreviousStep}>
@@ -662,7 +634,7 @@ function BookAppointment() {
                     </div>
                   </div>
                 )}
-                
+
                 {/* STEP 3: Confirmation */}
                 {currentStep === 3 && (
                   <div className="step-content">
@@ -670,20 +642,16 @@ function BookAppointment() {
                       <i className="bi bi-check-circle me-2"></i>
                       Xác nhận thông tin đặt lịch
                     </h4>
-                    
+
                     <Card className="border-0 bg-light mb-4">
                       <Card.Body>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <h5 className="mb-0">Thông tin khám bệnh</h5>
-                          <Button 
-                            variant="link" 
-                            className="p-0 text-decoration-none" 
-                            onClick={() => setCurrentStep(1)}
-                          >
+                          <Button variant="link" className="p-0 text-decoration-none" onClick={() => setCurrentStep(1)}>
                             <i className="bi bi-pencil me-1"></i> Chỉnh sửa
                           </Button>
                         </div>
-                        
+
                         <Row className="mb-3">
                           <Col md={6}>
                             <p className="mb-1 text-muted">Ngày khám</p>
@@ -694,39 +662,29 @@ function BookAppointment() {
                             <p className="fw-bold">{formData.time}</p>
                           </Col>
                         </Row>
-                        
+
                         <Row>
                           <Col>
                             <p className="mb-1 text-muted">Bác sĩ</p>
-                            <p className="fw-bold">{doctor.title} {doctor.firstName} {doctor.lastName}</p>
+                            <p className="fw-bold">
+                              {doctor.title} {doctor.firstName} {doctor.lastName}
+                            </p>
                           </Col>
                         </Row>
                       </Card.Body>
                     </Card>
-                    
+
                     <Card className="border-0 bg-light mb-4">
                       <Card.Body>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <h5 className="mb-0">Lý do khám bệnh</h5>
-                          <Button 
-                            variant="link" 
-                            className="p-0 text-decoration-none" 
-                            onClick={() => setCurrentStep(2)}
-                          >
+                          <Button variant="link" className="p-0 text-decoration-none" onClick={() => setCurrentStep(2)}>
                             <i className="bi bi-pencil me-1"></i> Chỉnh sửa
                           </Button>
                         </div>
-                        
+
                         <p>{formData.symptoms}</p>
-                        
-                        {formData.useInsurance && (
-                          <div className="mt-3">
-                            <h6>Thông tin bảo hiểm:</h6>
-                            <p className="mb-1"><strong>Đơn vị bảo hiểm:</strong> {formData.insuranceProvider || 'Chưa cung cấp'}</p>
-                            <p><strong>Số thẻ bảo hiểm:</strong> {formData.insuranceNumber || 'Chưa cung cấp'}</p>
-                          </div>
-                        )}
-                        
+
                         {formData.notes && (
                           <div className="mt-3">
                             <h6>Ghi chú bổ sung:</h6>
@@ -735,80 +693,68 @@ function BookAppointment() {
                         )}
                       </Card.Body>
                     </Card>
-                    
+
                     <Card className="border-0 bg-light mb-4">
                       <Card.Body>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <h5 className="mb-0">Thông tin liên hệ</h5>
-                          <Button 
-                            variant="link" 
-                            className="p-0 text-decoration-none" 
-                            onClick={() => setCurrentStep(2)}
-                          >
+                          <Button variant="link" className="p-0 text-decoration-none" onClick={() => setCurrentStep(2)}>
                             <i className="bi bi-pencil me-1"></i> Chỉnh sửa
                           </Button>
                         </div>
-                        
-                        <p className="mb-1"><strong>Họ tên:</strong> {formData.name || 'Chưa cung cấp'}</p>
-                        <p className="mb-1"><strong>Số điện thoại:</strong> {formData.phone || 'Chưa cung cấp'}</p>
-                        <p><strong>Email:</strong> {formData.email || 'Chưa cung cấp'}</p>
+
+                        <p className="mb-1">
+                          <strong>Họ tên:</strong> {formData.name || "Chưa cung cấp"}
+                        </p>
+                        <p className="mb-1">
+                          <strong>Số điện thoại:</strong> {formData.phone || "Chưa cung cấp"}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {formData.email || "Chưa cung cấp"}
+                        </p>
                       </Card.Body>
                     </Card>
-                    
+
                     <Card className="border-0 bg-light mb-4">
                       <Card.Body>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <h5 className="mb-0">Chi phí</h5>
                         </div>
-                        
+
                         <div className="d-flex justify-content-between">
                           <p className="mb-1">Phí khám</p>
-                          <p className="mb-1">{doctor.price.toLocaleString('vi-VN')}đ</p>
+                          <p className="mb-1">{(doctor.consultationFee || 0).toLocaleString("vi-VN")}đ</p>
                         </div>
-                        {formData.useInsurance && (
-                          <>
-                            <div className="d-flex justify-content-between">
-                              <p className="mb-1">Bảo hiểm</p>
-                              <p className="mb-1 text-success">- {Math.round(doctor.price * 0.3).toLocaleString('vi-VN')}đ</p>
-                            </div>
-                            <hr />
-                            <div className="d-flex justify-content-between">
-                              <p className="fw-bold mb-0">Tổng cộng</p>
-                              <p className="fw-bold mb-0">{Math.round(doctor.price * 0.7).toLocaleString('vi-VN')}đ</p>
-                            </div>
-                          </>
-                        )}
-                        {!formData.useInsurance && (
-                          <hr />
-                        )}
-                        {!formData.useInsurance && (
-                          <div className="d-flex justify-content-between">
-                            <p className="fw-bold mb-0">Tổng cộng</p>
-                            <p className="fw-bold mb-0">{doctor.price.toLocaleString('vi-VN')}đ</p>
-                          </div>
-                        )}
+                        <hr />
+                        <div className="d-flex justify-content-between">
+                          <p className="fw-bold mb-0">Tổng cộng</p>
+                          <p className="fw-bold mb-0">{(doctor.consultationFee || 0).toLocaleString("vi-VN")}đ</p>
+                        </div>
                       </Card.Body>
                     </Card>
-                    
+
                     <Alert variant="info">
                       <i className="bi bi-info-circle me-2"></i>
                       Bạn có thể hủy lịch hẹn miễn phí trước 24 giờ. Sau thời gian này, sẽ áp dụng phí hủy.
                     </Alert>
-                    
+
                     {/* Navigation buttons */}
                     <div className="d-flex justify-content-between mt-4">
                       <Button variant="outline-secondary" onClick={goToPreviousStep}>
                         <i className="bi bi-arrow-left me-2"></i>
                         Quay lại
                       </Button>
-                      <Button 
-                        variant="success" 
-                        type="submit" 
-                        disabled={submitting}
-                      >
+                      <Button variant="success" type="submit" disabled={submitting}>
                         {submitting ? (
                           <>
-                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                              className="me-2"
+                            />
                             Đang xử lý...
                           </>
                         ) : (
@@ -820,14 +766,13 @@ function BookAppointment() {
                     </div>
                   </div>
                 )}
-                
               </Form>
             </Card.Body>
           </Card>
         </Col>
       </Row>
     </Container>
-  );
+  )
 }
 
-export default BookAppointment;
+export default BookAppointment
