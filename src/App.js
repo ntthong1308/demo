@@ -39,6 +39,7 @@ import Services from "./pages/public/Services.jsx"
 import Equipment from "./pages/public/Equipment.jsx"
 import News from "./pages/public/News.jsx"
 import Contact from "./pages/public/Contact.jsx"
+import Specialties from "./pages/Specialties"
 import ChatBot from "./pages/chatbot.jsx";
 
 // Admin pages
@@ -80,6 +81,8 @@ function AppWithRouter() {
           <Route path="/equipment" element={<Equipment />} />
           <Route path="/news" element={<News />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/departments" element={<Specialties />} />
+          <Route path="/specialties" element={<Specialties />} />
           <Route path="/chat" element={<ChatBot />} />
 
           {/* Doctor Search routes */}

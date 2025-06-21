@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Badge, Spinner } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 function DoctorSearch() {
@@ -9,6 +9,7 @@ function DoctorSearch() {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState([]);
+  const [searchParams] = useSearchParams();
 
   // Chuyên khoa dạng id + name (hiển thị name, gửi id)
 useEffect(() => {
@@ -24,12 +25,30 @@ useEffect(() => {
     { id: 'RADIOLOGY', name: 'Chẩn đoán hình ảnh' },
     { id: 'GYNECOLOGY', name: 'Phụ khoa' },
     { id: 'OPHTHALMOLOGY', name: 'Mắt' },
-    { id: 'ENT', name: 'Tai - Mũi - Họng' },
+    { id: 'ENT', name: 'Tai-Mũi-Họng' },
     { id: 'DENTISTRY', name: 'Nha khoa' },
     { id: 'ANESTHESIOLOGY', name: 'Gây mê hồi sức' },
   ]);
 }, []);
 
+// Đọc tham số chuyên khoa từ URL và tự động tìm kiếm
+useEffect(() => {
+  const specialtyFromUrl = searchParams.get('specialty');
+  if (specialtyFromUrl && specialties.length > 0) {
+    // Tìm ID chuyên khoa tương ứng với tên
+    const specialty = specialties.find(s => s.name === specialtyFromUrl);
+    if (specialty) {
+      setSelectedSpecialty(specialty.id);
+    }
+  }
+}, [searchParams, specialties]);
+
+// Tự động tìm kiếm khi selectedSpecialty thay đổi
+useEffect(() => {
+  if (selectedSpecialty && searchParams.get('specialty')) {
+    handleSearch();
+  }
+}, [selectedSpecialty]);
 
 const handleSearch = async (e = null) => {
   if (e) e.preventDefault();
@@ -57,6 +76,19 @@ const handleSearch = async (e = null) => {
   return (
     <Container className="py-5">
       <h2>Tìm kiếm bác sĩ</h2>
+      
+      {searchParams.get('specialty') && (
+        <div className="alert alert-info mb-4 d-flex justify-content-between align-items-center">
+          <div>
+            <i className="bi bi-info-circle me-2"></i>
+            Đang hiển thị bác sĩ chuyên khoa: <strong>{searchParams.get('specialty')}</strong>
+          </div>
+          <Link to="/doctors" className="btn btn-outline-secondary btn-sm">
+            <i className="bi bi-x-circle me-1"></i>
+            Xóa bộ lọc
+          </Link>
+        </div>
+      )}
 
       <Form onSubmit={handleSearch} className="my-4">
         <Row>
