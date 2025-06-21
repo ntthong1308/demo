@@ -9,6 +9,7 @@ const Login = () => {
   const [formError, setFormError] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
 
+<<<<<<< HEAD
   const { login, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,6 +21,33 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, from]);
+=======
+  const { login, error, isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Mặc định chuyển hướng tới trang trước đó nếu có
+  const from = location.state?.from || '/';
+
+  // Xử lý chuyển hướng dựa vào vai trò
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log("User authenticated:", user);
+      
+      // Chuyển hướng dựa vào vai trò
+      if (user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (user.role === 'DOCTOR') {
+        navigate('/doctor', { replace: true });
+      } else if (user.role === 'PATIENT') {
+        navigate('/patient', { replace: true });
+      } else {
+        // Nếu không xác định được vai trò, chuyển hướng đến from
+        navigate(from, { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigate, from, user]);
+>>>>>>> 1a644ab (1)
 
   useEffect(() => {
     let timer;
@@ -48,6 +76,11 @@ const Login = () => {
     setLocalLoading(true);
 
     try {
+<<<<<<< HEAD
+=======
+      // Thêm console.log để debug
+      console.log("Attempting to login with:", { username });
+>>>>>>> 1a644ab (1)
       await login(username, password);
     } catch (error) {
       console.error('Login error:', error);
@@ -136,4 +169,8 @@ const Login = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Login;
+=======
+export default Login;
+>>>>>>> 1a644ab (1)

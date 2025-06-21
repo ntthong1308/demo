@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Badge, Spinner } from 'react-bootstrap';
+<<<<<<< HEAD
 import { Link, useSearchParams } from 'react-router-dom';
+=======
+import { Link } from 'react-router-dom';
+>>>>>>> 1a644ab (1)
 import axios from 'axios';
 
 function DoctorSearch() {
@@ -9,7 +13,10 @@ function DoctorSearch() {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState([]);
+<<<<<<< HEAD
   const [searchParams] = useSearchParams();
+=======
+>>>>>>> 1a644ab (1)
 
   // Chuyên khoa dạng id + name (hiển thị name, gửi id)
 useEffect(() => {
@@ -25,12 +32,17 @@ useEffect(() => {
     { id: 'RADIOLOGY', name: 'Chẩn đoán hình ảnh' },
     { id: 'GYNECOLOGY', name: 'Phụ khoa' },
     { id: 'OPHTHALMOLOGY', name: 'Mắt' },
+<<<<<<< HEAD
     { id: 'ENT', name: 'Tai-Mũi-Họng' },
+=======
+    { id: 'ENT', name: 'Tai - Mũi - Họng' },
+>>>>>>> 1a644ab (1)
     { id: 'DENTISTRY', name: 'Nha khoa' },
     { id: 'ANESTHESIOLOGY', name: 'Gây mê hồi sức' },
   ]);
 }, []);
 
+<<<<<<< HEAD
 // Đọc tham số chuyên khoa từ URL và tự động tìm kiếm
 useEffect(() => {
   const specialtyFromUrl = searchParams.get('specialty');
@@ -49,6 +61,8 @@ useEffect(() => {
     handleSearch();
   }
 }, [selectedSpecialty]);
+=======
+>>>>>>> 1a644ab (1)
 
 const handleSearch = async (e = null) => {
   if (e) e.preventDefault();
@@ -76,6 +90,7 @@ const handleSearch = async (e = null) => {
   return (
     <Container className="py-5">
       <h2>Tìm kiếm bác sĩ</h2>
+<<<<<<< HEAD
       
       {searchParams.get('specialty') && (
         <div className="alert alert-info mb-4 d-flex justify-content-between align-items-center">
@@ -89,6 +104,8 @@ const handleSearch = async (e = null) => {
           </Link>
         </div>
       )}
+=======
+>>>>>>> 1a644ab (1)
 
       <Form onSubmit={handleSearch} className="my-4">
         <Row>

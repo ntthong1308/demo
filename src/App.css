@@ -173,6 +173,7 @@ body {
   font-size: 0.95rem;
 }
 
+<<<<<<< HEAD
 /* Specialty cards */
 .specialty-card {
   transition: all 0.3s ease;
@@ -198,6 +199,8 @@ body {
   font-size: 24px;
 }
 
+=======
+>>>>>>> 1a644ab (1)
 /* Form styles */
 .form-container {
   background-color: var(--background-white);
@@ -335,4 +338,17 @@ body {
   .stat-number {
     font-size: 2rem;
   }
+<<<<<<< HEAD
+=======
+}
+/* Hiệu ứng hover cho card */
+.hover-card {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+>>>>>>> 1a644ab (1)
 }

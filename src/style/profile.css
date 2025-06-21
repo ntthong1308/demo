@@ -1,0 +1,76 @@
+/* Profile và Doctor Request styles */
+.profile-sidebar {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.profile-sidebar .nav-link {
+  color: #495057;
+  border-radius: 0.25rem;
+  padding: 0.6rem 1rem;
+}
+
+.profile-sidebar .nav-link:hover {
+  background-color: #f8f9fa;
+}
+
+.profile-sidebar .nav-link.active {
+  background-color: #e9ecef;
+  font-weight: 500;
+}
+
+/* Doctor request form styles */
+.file-upload-container {
+  border: 2px dashed #dee2e6;
+  border-radius: 0.25rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-upload-container:hover {
+  border-color: #adb5bd;
+  background-color: #f8f9fa;
+}
+
+.file-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.file-preview-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-preview-item img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.file-preview-item .file-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
